@@ -1,0 +1,34 @@
+name: Build Cuttlefish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout workflow repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git devscripts equivs config-package-dev debhelper-compat golang curl
+
+      - name: Clone android-cuttlefish
+        run: git clone https://github.com/google/android-cuttlefish
+
+      - name: Build packages
+        working-directory: android-cuttlefish
+        run: tools/buildutils/build_packages.sh
+
+      - name: Compress directory
+        run: |
+          zip -r android-cuttlefish.zip android-cuttlefish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-cuttlefish-build
+          path: android-cuttlefish.zip
